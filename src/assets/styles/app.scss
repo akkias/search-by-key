@@ -1,0 +1,145 @@
+@import 'mixins';
+@import 'variables';
+@import 'card';
+* {
+    box-sizing: border-box;
+}
+a {
+    color: $primary;
+    text-decoration: none;
+}
+body {
+    color: $textColor;
+    font-size: $fontSize;
+    font-family: $fontFamily;
+    line-height: 1.5;
+    margin: 0;
+}
+input {
+    border: 1px solid #E1E4E8;
+    border-radius: 4px;
+    font-size: $fontSize - 1;
+    height: 36px;
+    padding: 0 12px;
+    width: 100%;
+    transition: ease-in .15s;
+    &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 1px $primary;
+    }
+}
+.m-l-a {
+    margin-left: auto;
+}
+.m-r-a {
+    margin-right: auto;
+}
+.btn-submit {
+    background: $primary;
+    border: 0;
+    border-radius: 4px;
+    color: #FFF;
+    font-size: $fontSize - 2;
+    font-weight: 500;
+}
+.login-actions {
+    display: flex;
+    align-items: center;
+}
+.searchbar {
+    &-header {
+        background: #FFF;
+        box-shadow: $shadow;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    &-wrapper {
+        flex: 1;
+        max-width: 600px;
+        position: relative;
+        .search-icon {
+            opacity: .75;
+            position: absolute;
+            right: 12px;
+            top: 8px;
+        }
+    }
+}
+.characters-wrapper {
+    display: grid;
+    grid-gap: 24px;
+    grid-template-columns: repeat(3, calc(33.33% - 16px));
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.spinner {
+    position: absolute;
+    top: calc(50% + 18px);
+    left: calc(50% - 32px);
+    height: 64px;
+    background: #FFF;
+    box-shadow: $shadow;
+    border-radius: 50%;
+}
+.pager {
+    display: grid;
+    grid-gap: 12px;
+    grid-template-columns: repeat(2, 100px);
+    justify-content: center;
+    .btn {
+        background: $primary;
+        border: 0;
+        color: #FFF;
+        font-size: $fontSize - 2;
+        font-weight: 500;
+        border-radius: 4px;
+    }
+}
+.character-details {
+    background: #fffcf6;
+    bottom: 0;
+    box-shadow: $shadow;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 50%;
+    .character-details-cover {
+        height: 35vh;
+        position: relative;
+    }
+    .character-details-close {
+        cursor: pointer;
+        align-items: center;
+        border: 0;
+        border-radius: 50%;
+        box-shadow: $shadow;
+        display: flex;
+        font-weight: 400;
+        height: 32px;
+        justify-content: center;
+        letter-spacing: .6px;
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        width: 32px;
+        z-index: 1;
+    }
+    .character-title {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0;
+    }
+    .character-description {
+        opacity: .65;
+    }
+    .additional-links {
+        display: flex;
+        a {
+            font-size: 12px;
+            text-transform: capitalize;
+        }
+    }
+}
