@@ -2,7 +2,7 @@
 .card {
     background: #FFF;
     border-radius: 4px;
-    box-shadow: 0 0 10px 0 rgba(10, 31, 68, 0.2), 0 9px 10px 0 rgba(10, 31, 68, 0.1);
+    box-shadow: $shadow;
     overflow: hidden;
     &.card-login {
         margin: 20vh auto 0;

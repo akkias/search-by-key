@@ -19,7 +19,8 @@ class Characters extends Component {
         return (
             <div className="p-a-11">
                 <div className="characters-wrapper">
-                    {this.props.characters && this.renderCharacters(this.props.characters.results)}
+                    {(this.props.allCharacters && this.props.allCharacters.length) 
+                        && this.renderCharacters(this.props.allCharacters)}
                 </div>
             </div>
         )

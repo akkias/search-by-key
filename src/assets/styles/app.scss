@@ -9,6 +9,7 @@ a {
     text-decoration: none;
 }
 body {
+    background: $bodyBackground;
     color: $textColor;
     font-size: $fontSize;
     font-family: $fontFamily;
@@ -47,16 +48,18 @@ input {
     display: flex;
     align-items: center;
 }
-.searchbar {
-    &-header {
-        background: #FFF;
-        box-shadow: $shadow;
-        height: 100px;
-        display: flex;
-        align-items: center;
+.header {
+    background: #FFF;
+    box-shadow: $shadow;
+    &-content {
+        height: 60px;
+        align-items: center;        
         justify-content: center;
+        display: flex;
+        margin: 0 auto;
+        max-width: 1100px;
     }
-    &-wrapper {
+    .searchbar-wrapper {
         flex: 1;
         max-width: 600px;
         position: relative;
@@ -128,6 +131,9 @@ input {
         z-index: 1;
     }
     .character-title {
+        border-bottom: double;
+        color: $titleColor;
+        display: inline-block;
         font-size: 18px;
         font-weight: 500;
         margin: 0;

@@ -1,16 +1,22 @@
 import React, {Component} from 'react';
 import SearchBar from './SearchBar';
 import Characters from './Characters';
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
+import {getCharacters} from '../actions';
+import axios from 'axios';
 import CharacterDetails from './CharacterDetails'
 import {debounce} from '../utils/funcUtils'
+import {get} from '../utils/apiUtils'
 
 const URL = 'https://gateway.marvel.com/v1/public/characters';
+const APIKey = `24d21955ce01a5cd7e83534899cbdea8`;
 class Search extends Component {
     constructor(props) {
         super();
         this.state = {
-            allCharacters: '',
-            searchedCharacters: '',
+            allCharacters: "",
+            searchedCharacters: "",
             showLoader: true,
             perPageLimit: 18,
             currentPage: 0,
@@ -23,32 +29,37 @@ class Search extends Component {
         this.getNamedCharacters = debounce(this.getNamedCharacters, 450);
     }
     fetchAllCharacters() {
-        fetch(URL+`?apikey=24d21955ce01a5cd7e83534899cbdea8&limit=${this.state.perPageLimit}&offset=${this.state.offset}`)
-        .then(response => response.json())
+        axios.get(URL,{
+            params:{
+                apikey: APIKey,
+                limit: this.props.perPageLimit, 
+                offset: this.props.offset
+            }
+        })
         .then(response => {
-            this.setState({
-                allCharacters: response.data,
-                searchedCharacters: response.data,
-                showLoader: false,
-                initTotalPages: response.data.total,
-                searchTotalPages: response.data.total
-            });
+            this.props.getCharacters(response);
         })
     }
     async getNamedCharacters (keyword) {
-        const response = await fetch(URL+`?apikey=24d21955ce01a5cd7e83534899cbdea8&name=${keyword}&limit=${this.state.perPageLimit}&offset=${this.state.offset}`);
-        const data = await response.json();
-        this.setState({
-            searchedCharacters: data.data,
-            showLoader: false,
-            searchTotalPages: data.data.total
-        })
+        get(URL, {
+            apikey: APIKey, 
+            name: keyword,
+            limit: this.props.perPageLimit,
+            offset: this.props.offset
+        }).then(
+            response => this.props.searchCharacter(response),
+            this.setState({
+                showLoader: false
+            })
+         ).catch(
+            error => console.log(error)
+         );
     }
-    performSearch (keyword) {
+    performSearch(keyword) {
         if(!keyword) {
             return this.setState({
-                searchedCharacters: this.state.allCharacters,
-                searchTotalPages: this.state.initTotalPages
+                searchedCharacters: this.props.allCharacters,
+                searchTotalPages: this.props.initTotalPages
             })
         }
         this.setState({
@@ -60,10 +71,10 @@ class Search extends Component {
     handlePagination (action) {
         let offset;
         this.setState({
-            currentPage: action === 'prev' ? this.state.currentPage - 1 : this.state.currentPage + 1,
+            currentPage: action === 'prev' ? this.props.currentPage - 1 : this.props.currentPage + 1,
             showLoader: true
         },function() {
-            offset = Math.ceil(this.state.currentPage * this.state.perPageLimit);
+            offset = Math.ceil(this.props.currentPage * this.props.perPageLimit);
             this.setState({
                 offset
                 },function() {
@@ -73,7 +84,7 @@ class Search extends Component {
         })
     }
     showCharacterDetails(id) {
-        const characterDetails = this.state.searchedCharacters.results.filter(character => character.id === id);
+        const characterDetails = this.props.searchedCharacters.filter(character => character.id === id);
         this.setState({
             characterDetails,
             showDetailsPopover: true
@@ -85,22 +96,31 @@ class Search extends Component {
         })
     }
     componentDidMount() {
-        this.fetchAllCharacters();
+        get(URL, {
+            apikey: APIKey,
+            limit: this.props.perPageLimit, 
+            offset: this.props.offset
+        }).then(
+            response => this.props.getCharacters(response),
+            this.setState({
+                showLoader: false
+            })
+         ).catch(
+            error => console.log(error)
+         );
     }
     render() {
         return(
             <>
-                <SearchBar performSearch={keyword => this.performSearch(keyword)} />
-                {this.state.showLoader ?  
-                    <div className="spinner"><img height="64" src="/assets/images/spinner.svg" alt="Loading" /></div> 
+                <SearchBar isAuthenticated={this.props.isAuthenticated} performSearch={keyword => this.performSearch(keyword)} />
+                {this.props.searchedCharacters && this.props.searchedCharacters.length ?  
+                        <Characters showCharacterDetails={(id) => this.showCharacterDetails(id)} allCharacters={this.props.searchedCharacters} />
                     : 
-                    this.state.searchedCharacters.results.length ?
-                        <Characters showCharacterDetails={(id) => this.showCharacterDetails(id)} currentPage={this.state.currentPage} handlePagination={(action) => this.handlePagination(action)} characters={this.state.searchedCharacters} />
-                        : 'No Results Found'
+                    <div className="spinner"><img height="64" src="/assets/images/spinner.svg" alt="Loading" /></div> 
                 }
-                {this.state.searchTotalPages > 1 &&
+                {this.props.searchTotalPages > 1 &&
                     <div className="pager p-a-8">
-                        {this.state.currentPage !== 0 &&
+                        {this.props.currentPage !== 0 &&
                             <button className="btn p-x-5 p-y-3" onClick={() => this.handlePagination('prev')}>Prev</button>
                         }
                         <button className="btn p-x-5 p-y-3" onClick={() => this.handlePagination('next')}>Next</button>
@@ -113,5 +133,16 @@ class Search extends Component {
         )
     }
 }
-
-export default Search;
+const mapStateToProps =  (state) => { 
+    return {
+        allCharacters: state.mcuCharacters.results,
+        searchedCharacters: state.mcuCharacters.results,
+        initTotalPages: state.mcuCharacters.total,
+        searchTotalPages: state.mcuCharacters.total
+    }
+}
+const mapDispatchToProps = dispatch => bindActionCreators(
+    { getCharacters }, dispatch
+)
+export default connect(mapStateToProps, mapDispatchToProps)(Search);
+export { Search };

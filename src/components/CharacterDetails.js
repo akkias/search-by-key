@@ -10,12 +10,12 @@ const CharacterDetails = (props) => {
                     </button>
                     <div className="character-details-cover" style={{ background: `url(${character.thumbnail.path}.${character.thumbnail.extension}) no-repeat center / cover` }}></div>
                     <div className="p-a-12">
-                        <h2 className="character-title">{character.name}</h2>
+                        <h2 className="character-title m-b-4">{character.name}</h2>
                         <p className="character-description m-t-0">{character.description}</p>
                         <div className="additional-links">
                             {character.urls.map((link, i) => {
                                 return(
-                                    <a className="m-r-2" key={i} href={link.url} target="_blank">{link.type}</a>
+                                    <a className="m-r-2" key={i} href={link.url} rel='nofollow noreferrer noopener' target="_blank">{link.type}</a>
                                 )
                             })}
                         </div>

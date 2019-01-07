@@ -3,9 +3,10 @@ import {Link} from 'react-router-dom';
 
 const UserForm = (props) => {
     return(
-        <form>
-            <input className="m-b-4" placeholder="Enter your email" type="email" />
-            <input className="m-b-4" placeholder="Enter your password" type="password" />
+        <form onSubmit={props.handleFormSubmit}>
+        {props.hasError && props.errorMessage}
+            <input className="m-b-4" placeholder="Enter your email" type="email" name="email" />
+            <input className="m-b-4" placeholder="Enter your password" type="password" name="password" />
             <div className="login-actions">
             {props.location === "signin" ?
                 <Link to="/signup">Create new account</Link>
