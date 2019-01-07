@@ -4,19 +4,8 @@ const SearchIcon = 'assets/images/search.svg';
 
 
 class SearchBar extends Component {
-    constructor(props) {
-        super();
-        this.state = {
-            keyword: ''
-        }
-    }
     inputChange = (e) => {
-        this.setState({
-            keyword: e.target.value
-        },
-        function() {
-            this.props.performSearch(this.state.keyword)
-        })
+            this.props.performSearch(e.target.value)
     }
     render() {
         return(

@@ -9,5 +9,6 @@ import App from './components/App';
 const rootReducer = combineReducers({mcuCharacters});
 export const store = createStore(rootReducer);
 
+require('dotenv').config();
 
 ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('root'));

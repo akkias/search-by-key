@@ -3,14 +3,11 @@ import SearchBar from './SearchBar';
 import Characters from './Characters';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
-import {getCharacters} from '../actions';
-import axios from 'axios';
+import {getCharacters, searchCharacter} from '../actions';
 import CharacterDetails from './CharacterDetails'
 import {debounce} from '../utils/funcUtils'
 import {get} from '../utils/apiUtils'
 
-const URL = 'https://gateway.marvel.com/v1/public/characters';
-const APIKey = `24d21955ce01a5cd7e83534899cbdea8`;
 class Search extends Component {
     constructor(props) {
         super();
@@ -29,23 +26,25 @@ class Search extends Component {
         this.getNamedCharacters = debounce(this.getNamedCharacters, 450);
     }
     fetchAllCharacters() {
-        axios.get(URL,{
-            params:{
-                apikey: APIKey,
-                limit: this.props.perPageLimit, 
-                offset: this.props.offset
-            }
-        })
-        .then(response => {
-            this.props.getCharacters(response);
-        })
+        get(process.env.REACT_APP_DEV_API_URL        , {
+            apikey: process.env.REACT_APP_DEV_API_KEY,
+            limit: this.state.perPageLimit, 
+            offset: this.state.offset
+        }).then(
+            response => this.props.getCharacters(response),
+            this.setState({
+                showLoader: false
+            })
+         ).catch(
+            error => console.log(error)
+         );
     }
-    async getNamedCharacters (keyword) {
-        get(URL, {
-            apikey: APIKey, 
+    getNamedCharacters (keyword) {
+        get(process.env.REACT_APP_DEV_API_URL, {
+            apikey: process.env.REACT_APP_DEV_API_KEY,
             name: keyword,
-            limit: this.props.perPageLimit,
-            offset: this.props.offset
+            limit: this.state.perPageLimit,
+            offset: this.state.offset
         }).then(
             response => this.props.searchCharacter(response),
             this.setState({
@@ -56,25 +55,15 @@ class Search extends Component {
          );
     }
     performSearch(keyword) {
-        if(!keyword) {
-            return this.setState({
-                searchedCharacters: this.props.allCharacters,
-                searchTotalPages: this.props.initTotalPages
-            })
-        }
-        this.setState({
-            showLoader: true,
-            offset: 0
-        })
         this.getNamedCharacters(keyword);
     }
     handlePagination (action) {
         let offset;
         this.setState({
-            currentPage: action === 'prev' ? this.props.currentPage - 1 : this.props.currentPage + 1,
+            currentPage: action === 'prev' ? this.state.currentPage - 1 : this.state.currentPage + 1,
             showLoader: true
         },function() {
-            offset = Math.ceil(this.props.currentPage * this.props.perPageLimit);
+            offset = Math.ceil(this.state.currentPage * this.state.perPageLimit);
             this.setState({
                 offset
                 },function() {
@@ -96,18 +85,7 @@ class Search extends Component {
         })
     }
     componentDidMount() {
-        get(URL, {
-            apikey: APIKey,
-            limit: this.props.perPageLimit, 
-            offset: this.props.offset
-        }).then(
-            response => this.props.getCharacters(response),
-            this.setState({
-                showLoader: false
-            })
-         ).catch(
-            error => console.log(error)
-         );
+        this.fetchAllCharacters();
     }
     render() {
         return(
@@ -116,7 +94,9 @@ class Search extends Component {
                 {this.props.searchedCharacters && this.props.searchedCharacters.length ?  
                         <Characters showCharacterDetails={(id) => this.showCharacterDetails(id)} allCharacters={this.props.searchedCharacters} />
                     : 
-                    <div className="spinner"><img height="64" src="/assets/images/spinner.svg" alt="Loading" /></div> 
+                        this.props.searchedCharacters != 0 ?
+                            <div className="spinner"><img height="64" src="/assets/images/spinner.svg" alt="Loading" /></div> 
+                            : "No results found"
                 }
                 {this.props.searchTotalPages > 1 &&
                     <div className="pager p-a-8">
@@ -142,7 +122,7 @@ const mapStateToProps =  (state) => {
     }
 }
 const mapDispatchToProps = dispatch => bindActionCreators(
-    { getCharacters }, dispatch
+    { getCharacters, searchCharacter }, dispatch
 )
 export default connect(mapStateToProps, mapDispatchToProps)(Search);
 export { Search };

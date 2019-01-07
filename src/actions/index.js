@@ -6,11 +6,11 @@ export function getCharacters(characters) {
         }
     }
 }
-export function searchCharacter(character) {
+export function searchCharacter(characters) {
     return {
         type: "SEARCH_CHARACTER",
         payload: {
-            character
+            characters
         }
     }
 }

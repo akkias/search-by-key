@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {BrowserRouter, Route} from 'react-router-dom';
+import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import Search from './Search';
@@ -15,9 +15,11 @@ class App extends Component {
     return (
       <BrowserRouter>
         <>
-          <Route path="/signin" component={SignIn} />
-          <Route path="/signup" component={SignUp} />
-          <Route path="/search" component={Search} isAuthenticated={this.state.isAuthenticated} />
+          <Switch>
+            <Route path="/signin" component={SignIn} />
+            <Route path="/signup" component={SignUp} />
+            <Route path="/" component={Search} isAuthenticated={this.state.isAuthenticated} exact />
+          </Switch>
         </>
       </BrowserRouter>
     );
