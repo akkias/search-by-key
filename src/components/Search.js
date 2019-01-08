@@ -14,14 +14,14 @@ class Search extends Component {
         this.state = {
             allCharacters: "",
             searchedCharacters: "",
-            showLoader: true,
             perPageLimit: 18,
-            currentPage: 0,
-            initTotalPages: 0,
-            searchTotalPages: 0,
+            currentPage: 1,
+            totalPages: 0,
             offset: 0,
             showDetailsPopover: false,
-            characterDetails: []
+            characterDetails: [],
+            hasSearched: false,
+            isLoading: true
         }
         this.getNamedCharacters = debounce(this.getNamedCharacters, 450);
     }
@@ -33,13 +33,13 @@ class Search extends Component {
         }).then(
             response => this.props.getCharacters(response),
             this.setState({
-                showLoader: false
+                isLoading: false
             })
          ).catch(
             error => console.log(error)
          );
     }
-    getNamedCharacters (keyword) {
+    getNamedCharacters(keyword) {
         get(process.env.REACT_APP_DEV_API_URL, {
             apikey: process.env.REACT_APP_DEV_API_KEY,
             name: keyword,
@@ -47,9 +47,6 @@ class Search extends Component {
             offset: this.state.offset
         }).then(
             response => this.props.searchCharacter(response),
-            this.setState({
-                showLoader: false
-            })
          ).catch(
             error => console.log(error)
          );
@@ -61,7 +58,7 @@ class Search extends Component {
         let offset;
         this.setState({
             currentPage: action === 'prev' ? this.state.currentPage - 1 : this.state.currentPage + 1,
-            showLoader: true
+            isLoading: true
         },function() {
             offset = Math.ceil(this.state.currentPage * this.state.perPageLimit);
             this.setState({
@@ -73,7 +70,7 @@ class Search extends Component {
         })
     }
     showCharacterDetails(id) {
-        const characterDetails = this.props.searchedCharacters.filter(character => character.id === id);
+        const characterDetails = this.props.allCharacters.results.filter(character => character.id === id);
         this.setState({
             characterDetails,
             showDetailsPopover: true
@@ -90,19 +87,17 @@ class Search extends Component {
     render() {
         return(
             <>
-                <SearchBar isAuthenticated={this.props.isAuthenticated} performSearch={keyword => this.performSearch(keyword)} />
-                {this.props.searchedCharacters && this.props.searchedCharacters.length ?  
-                        <Characters showCharacterDetails={(id) => this.showCharacterDetails(id)} allCharacters={this.props.searchedCharacters} />
+                <SearchBar isAuthenticated={true} performSearch={keyword => this.performSearch(keyword)} />
+                {!this.state.isLoading && this.props.allCharacters.results && this.props.allCharacters.results.length ?  
+                        <Characters showCharacterDetails={(id) => this.showCharacterDetails(id)} allCharacters={this.state.hasSearched ? this.props.searchedCharacters.results :  this.props.allCharacters.results} />
                     : 
-                        this.props.searchedCharacters != 0 ?
+                        this.props.searchedCharacters !== 0 ?
                             <div className="spinner"><img height="64" src="/assets/images/spinner.svg" alt="Loading" /></div> 
                             : "No results found"
                 }
-                {this.props.searchTotalPages > 1 &&
+                {this.props.totalPages > 1 &&
                     <div className="pager p-a-8">
-                        {this.props.currentPage !== 0 &&
-                            <button className="btn p-x-5 p-y-3" onClick={() => this.handlePagination('prev')}>Prev</button>
-                        }
+                        <button disabled={this.state.currentPage <= 1} className={`btn p-x-5 p-y-3 ${this.state.currentPage <= 1 && `btn-disabled`}`} onClick={() => this.handlePagination('prev')}>Prev</button>
                         <button className="btn p-x-5 p-y-3" onClick={() => this.handlePagination('next')}>Next</button>
                     </div>
                 }
@@ -115,10 +110,9 @@ class Search extends Component {
 }
 const mapStateToProps =  (state) => { 
     return {
-        allCharacters: state.mcuCharacters.results,
-        searchedCharacters: state.mcuCharacters.results,
-        initTotalPages: state.mcuCharacters.total,
-        searchTotalPages: state.mcuCharacters.total
+        allCharacters: state.mcuCharacters.characters.allCharacters,
+        searchedCharacters: state.mcuCharacters.characters.searchedCharacters,
+        totalPages: state.mcuCharacters.characters.totalPages,
     }
 }
 const mapDispatchToProps = dispatch => bindActionCreators(
